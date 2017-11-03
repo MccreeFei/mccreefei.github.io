@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>Mysql InnoDB索引原理与优化实践 | MccreeFei的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言实习过程中经常碰到自己写的查询sql语句跑了好几秒甚至十几秒都没结果的情况，自己也仔细检查了查询的逻辑没发现问题，那么基本可以确定是索引的问题了。Mysql中的索引本质上就和字典当中的索引一样，如果不借助索引，在一本字典当中查找一个单词，就必须从第一页开始找，速度可想而知会非常的慢。然而建立了索引之后，就可以很快速的找到首字母开始出现的位置，大大减少了查询的时间。可见索引在数据库中扮演着一个十">
+<meta name="keywords" content="Mysql">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mysql InnoDB索引原理与优化实践">
+<meta property="og:url" content="http://www.mccreefei.cn/2017/08/31/mysql-innodb-index/index.html">
+<meta property="og:site_name" content="MccreeFei的博客">
+<meta property="og:description" content="前言实习过程中经常碰到自己写的查询sql语句跑了好几秒甚至十几秒都没结果的情况，自己也仔细检查了查询的逻辑没发现问题，那么基本可以确定是索引的问题了。Mysql中的索引本质上就和字典当中的索引一样，如果不借助索引，在一本字典当中查找一个单词，就必须从第一页开始找，速度可想而知会非常的慢。然而建立了索引之后，就可以很快速的找到首字母开始出现的位置，大大减少了查询的时间。可见索引在数据库中扮演着一个十">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://otse9kdii.bkt.clouddn.com/17-9-1/63639710.jpg">
+<meta property="og:image" content="http://otse9kdii.bkt.clouddn.com/17-9-1/20128078.jpg">
+<meta property="og:updated_time" content="2017-09-01T12:25:14.701Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Mysql InnoDB索引原理与优化实践">
+<meta name="twitter:description" content="前言实习过程中经常碰到自己写的查询sql语句跑了好几秒甚至十几秒都没结果的情况，自己也仔细检查了查询的逻辑没发现问题，那么基本可以确定是索引的问题了。Mysql中的索引本质上就和字典当中的索引一样，如果不借助索引，在一本字典当中查找一个单词，就必须从第一页开始找，速度可想而知会非常的慢。然而建立了索引之后，就可以很快速的找到首字母开始出现的位置，大大减少了查询的时间。可见索引在数据库中扮演着一个十">
+<meta name="twitter:image" content="http://otse9kdii.bkt.clouddn.com/17-9-1/63639710.jpg">
+  
+    <link rel="alternative" href="/atom.xml" title="MccreeFei的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img src="/avatar.png" class="js-avatar" style="width: 100%;height: 100%;opacity: 1;">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">MccreeFei</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">Carpe Diem</p>
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+						<div class="icon-wrap icon-me hide" data-idx="3">
+							<div class="user"></div>
+							<div class="shoulder"></div>
+						</div>
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>菜单</li>
+						<li>标签</li>
+						
+						<li>友情链接</li>
+						
+						
+						<li>关于我</li>
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/categories/Java">JAVA相关</a></li>
+				        
+							<li><a href="/categories/Essay">随笔</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+								<a class="github" target="_blank" href="https://github.com/mccreefei" title="github">github</a>
+					        
+								<a class="mail" target="_blank" href="mailto:mccreefei@foxmail.com" title="mail">mail</a>
+					        
+								<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+					        
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						<a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/Jvm/" style="font-size: 13.33px;">Jvm</a> <a href="/tags/Mysql/" style="font-size: 13.33px;">Mysql</a> <a href="/tags/SSM/" style="font-size: 10px;">SSM</a> <a href="/tags/Wireshark/" style="font-size: 10px;">Wireshark</a> <a href="/tags/Zookeeper/" style="font-size: 10px;">Zookeeper</a> <a href="/tags/Distributed/" style="font-size: 10px;">分布式</a> <a href="/tags/MutiThread/" style="font-size: 20px;">多线程</a> <a href="/tags/DataStructure/" style="font-size: 16.67px;">数据结构</a> <a href="/tags/Algorithm/" style="font-size: 16.67px;">算法</a> <a href="/tags/Essay/" style="font-size: 10px;">随笔</a> <a href="/tags/Project/" style="font-size: 10px;">项目</a>
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="https://imququ.com/">JerryQu的博客</a>
+			        
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="http://zhangbuhuai.com/">张不坏的博客</a>
+			        
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="https://www.liaoxuefeng.com/">廖雪峰的官方网站</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+				
+				<section class="switch-part switch-part4">
+				
+					<div id="js-aboutme">浙江财经大学在读，对java web方向感兴趣，目前在浙江禾连网络有限公司担任java开发实习职务。   I just wake up and work hard     I leave the rest to god。</div>
+				</section>
+				
+			</div>
+		</div>
+	</header>				
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">MccreeFei</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+			
+				<img src="/avatar.png" class="js-avatar" style="width: 100%;height: 100%;opacity: 1;">
+			
+			</div>
+			<hgroup>
+			  <h1 class="header-author">MccreeFei</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">Carpe Diem</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/categories/Java">JAVA相关</a></li>
+		        
+					<li><a href="/categories/Essay">随笔</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/mccreefei" title="github">github</a>
+			        
+						<a class="mail" target="_blank" href="mailto:mccreefei@foxmail.com" title="mail">mail</a>
+			        
+						<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap"><article id="post-mysql-innodb-index" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2017/08/31/mysql-innodb-index/" class="article-date">
+  	<time datetime="2017-08-31T14:13:10.000Z" itemprop="datePublished">2017-08-31</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Mysql InnoDB索引原理与优化实践
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Mysql/">Mysql</a></li></ul>
+	</div>
+
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/Other/">Other</a>
+	</div>
+
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>实习过程中经常碰到自己写的查询<code>sql</code>语句跑了好几秒甚至十几秒都没结果的情况，自己也仔细检查了查询的逻辑没发现问题，那么基本可以确定是索引的问题了。<code>Mysql</code>中的索引本质上就和字典当中的索引一样，如果不借助索引，在一本字典当中查找一个单词，就必须从第一页开始找，速度可想而知会非常的慢。然而建立了索引之后，就可以很快速的找到首字母开始出现的位置，大大减少了查询的时间。可见索引在数据库中扮演着一个十分重要的角色，深入了解索引的内部原理就显得很有必要了。</p>
+<h2 id="索引原理"><a href="#索引原理" class="headerlink" title="索引原理"></a>索引原理</h2><p>要想深入地了解索引，那就必须先要了解索引的本质了。因为<code>InnoDB</code>引擎在<code>Mysql</code>中已经占据着主导地位，所以本篇都是基于<code>InnoDB</code>存储引擎之上的。不同于<code>MyISAM</code>，<code>InnoDB</code>最大的特点就是它的存储文件同样也是索引文件，这个索引被称为聚簇索引，表示数据行和索引紧凑地存储在一起。<code>InnoDB</code>索引的结构是一颗<code>B+树</code>，数据库表中的所有数据都是存放在叶子结点之上的，内部节点存储的是索引值。结构如下图所示：</p>
+<center><img src="http://otse9kdii.bkt.clouddn.com/17-9-1/63639710.jpg" alt=""></center>
+
+<p>图中我们可以看到，每个数据行都是通过聚簇索引查询或是数据行间的链接得到，可见每个<code>InnoDB</code>表都必须有这么一个聚簇索引，那么什么样的索引会作为聚簇索引呢？定义了主键了的话，那么主键就是聚簇索引，如果没有，InnoDB会选取一个唯一的非空索引来代替，如果还是没有，那么<code>InnoDB</code>会隐式地创建一个主键作为聚簇索引。</p>
+<a id="more"></a>
+<p>接下来看看<code>InnoDB</code>中的二级索引(<em>聚簇索引之外的所有其他索引都被称为二级索引</em> )，<strong>二级索引存储结构中数据域存储的其实是主键值</strong>，也就是说当使用二级索引进行查询时，实际上是进行了两次查询，第一次根据二级索引获取到主键值，第二次根据查询到的主键值找到所需要的数据。结构如下图所示：</p>
+<center><img src="http://otse9kdii.bkt.clouddn.com/17-9-1/20128078.jpg" alt=""></center>
+
+<h2 id="优化实践"><a href="#优化实践" class="headerlink" title="优化实践"></a>优化实践</h2><p>测试使用的数据库为<code>Mysql</code>官方提供的事例数据库，下载地址：<a href="https://github.com/datacharmer/test_db" target="_blank" rel="external">https://github.com/datacharmer/test_db</a>。主要使用的是其中的<code>employees</code>表，表结构如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">mysql&gt; show create table employees\G;</div><div class="line">*************************** 1. row ***************************</div><div class="line">       Table: employees</div><div class="line">Create Table: CREATE TABLE `employees` (</div><div class="line">  `emp_no` int(11) NOT NULL,</div><div class="line">  `birth_date` date NOT NULL,</div><div class="line">  `first_name` varchar(14) NOT NULL,</div><div class="line">  `last_name` varchar(16) NOT NULL,</div><div class="line">  `gender` enum(&apos;M&apos;,&apos;F&apos;) NOT NULL,</div><div class="line">  `hire_date` date NOT NULL,</div><div class="line">  PRIMARY KEY (`emp_no`)</div><div class="line">) ENGINE=InnoDB DEFAULT CHARSET=utf8</div><div class="line">1 row in set (0.00 sec)</div></pre></td></tr></table></figure></p>
+<h3 id="最左前缀索引"><a href="#最左前缀索引" class="headerlink" title="最左前缀索引"></a>最左前缀索引</h3><p>首先创建一个组合索引<code>idx_test</code>：</p>
+<blockquote>
+<p>mysql&gt; create index idx_test on employees(birth_date,first_name,last_name);</p>
+</blockquote>
+<p>然后我们根据<code>idx_test</code>索引的第一列进行查询：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">mysql&gt; explain select * from employees where birth_date=&apos;1953-11-7&apos;\G;</div><div class="line">*************************** 1. row ***************************</div><div class="line">           id: 1</div><div class="line">  select_type: SIMPLE</div><div class="line">        table: employees</div><div class="line">   partitions: NULL</div><div class="line">         type: ref</div><div class="line">possible_keys: idx_test</div><div class="line">          key: idx_test</div><div class="line">      key_len: 3</div><div class="line">          ref: const</div><div class="line">         rows: 61</div><div class="line">     filtered: 100.00</div><div class="line">        Extra: NULL</div><div class="line">1 row in set, 1 warning (0.04 sec)</div></pre></td></tr></table></figure>
+<p>从<code>key</code>中可以看到，查询确实使用到了我们创建的组合索引，并且只是用了组合索引当中的第一列，<code>key_len</code>为3。接着我们用组合索引的第一列和第三列作为条件进行查询：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">mysql&gt; explain select * from employees where birth_date=&apos;1952-11-7&apos; and last_nam</div><div class="line">e=&apos;Sluis&apos;\G;</div><div class="line">*************************** 1. row ***************************</div><div class="line">           id: 1</div><div class="line">  select_type: SIMPLE</div><div class="line">        table: employees</div><div class="line">   partitions: NULL</div><div class="line">         type: ref</div><div class="line">possible_keys: idx_test</div><div class="line">          key: idx_test</div><div class="line">      key_len: 3</div><div class="line">          ref: const</div><div class="line">         rows: 65</div><div class="line">     filtered: 10.00</div><div class="line">        Extra: Using index condition</div><div class="line">1 row in set, 1 warning (0.04 sec)</div></pre></td></tr></table></figure></p>
+<p>可以看到数据库依旧是使用到了我们创建的索引，但是<code>key_len=3</code>，也就是只用到了组和索引的第一列，第三列并没有使用到，符合最左前缀思想。<br>当组合索引中第x列存在范围条件，那么第x列后面的列索引将不会使用到，看下面的例子：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">mysql&gt; explain select * from employees where birth_date&gt;&apos;1965-01-31&apos; and first_n</div><div class="line">ame=&apos;Steve&apos; and last_name=&apos;Denji&apos;\G;</div><div class="line">*************************** 1. row ***************************</div><div class="line">           id: 1</div><div class="line">  select_type: SIMPLE</div><div class="line">        table: employees</div><div class="line">   partitions: NULL</div><div class="line">         type: range</div><div class="line">possible_keys: idx_test</div><div class="line">          key: idx_test</div><div class="line">      key_len: 3</div><div class="line">          ref: NULL</div><div class="line">         rows: 49</div><div class="line">     filtered: 1.00</div><div class="line">        Extra: Using index condition</div><div class="line">1 row in set, 1 warning (0.00 sec)</div></pre></td></tr></table></figure></p>
+<p><code>key_len=3</code>,只有第一列索引被使用到了，就是因为<code>birth_date</code>是比较操作。</p>
+<h3 id="覆盖索引"><a href="#覆盖索引" class="headerlink" title="覆盖索引"></a>覆盖索引</h3><p>前面就已经说到<code>InnoDB</code>二级索引存储的数据其实是主键值，每次使用二级索引都会进行两次查询。其实有一种情况，数据库只需要查询二级索引就行了，那就是<code>select</code>查询的列在二级索引存储结构中都可以被查询到，那么数据库就不需要再回主键查询。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">mysql&gt; explain select * from employees where birth_date=&apos;1956-02-12&apos; and first_n</div><div class="line">ame=&apos;Berni&apos; and last_name=&apos;Sluis&apos;\G;</div><div class="line">*************************** 1. row ***************************</div><div class="line">           id: 1</div><div class="line">  select_type: SIMPLE</div><div class="line">        table: employees</div><div class="line">   partitions: NULL</div><div class="line">         type: ref</div><div class="line">possible_keys: idx_test</div><div class="line">          key: idx_test</div><div class="line">      key_len: 97</div><div class="line">          ref: const,const,const</div><div class="line">         rows: 1</div><div class="line">     filtered: 100.00</div><div class="line">        Extra: NULL</div><div class="line">1 row in set, 1 warning (0.04 sec)</div></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">mysql&gt; explain select birth_date,first_name,last_name from employees where birth</div><div class="line">_date=&apos;1956-02-12&apos; and first_name=&apos;Berni&apos; and last_name=&apos;Sluis&apos;\G;</div><div class="line">*************************** 1. row ***************************</div><div class="line">           id: 1</div><div class="line">  select_type: SIMPLE</div><div class="line">        table: employees</div><div class="line">   partitions: NULL</div><div class="line">         type: ref</div><div class="line">possible_keys: idx_test</div><div class="line">          key: idx_test</div><div class="line">      key_len: 97</div><div class="line">          ref: const,const,const</div><div class="line">         rows: 1</div><div class="line">     filtered: 100.00</div><div class="line">        Extra: Using index</div><div class="line">1 row in set, 1 warning (0.02 sec)</div></pre></td></tr></table></figure>
+<p>可以看到，第一次使用<code>select *</code>条件进行查询，其中包括了二级索引存储结构中不存在的列，所以数据库需要回主键查询。而第二次，<code>select</code>查询的列都是在二级索引存储结构中存在的，数据库只需要一次查询便可得到结果，所以速度更快。</p>
+<h3 id="前缀索引"><a href="#前缀索引" class="headerlink" title="前缀索引"></a>前缀索引</h3><p>有时候需要索引很长的字符列，这会让索引变得大且慢，那么就可以索引该列的前一部分字符，这样就可以大大节约索引空间，从而提高索引效率，但是这样也会降低索引的选择性。选择性是指不重复的索引值和数据表记录总数的比值。范围会在0-1之间，选择性越高查询效率就会越高。比如性别列，<code>选择性=2/count(*)</code>,当表记录越来越大时，选择性趋向于0，所以性别列的查询效率会很低。需要注意的是前缀索引也有缺点，那就是<code>Mysql</code>无法使用前缀索引做<code>order by</code>和<code>group by</code>操作，也无法使用前缀索引做覆盖扫描。</p>
+<h2 id="PS"><a href="#PS" class="headerlink" title="PS"></a>PS</h2><p><strong>查询容易，优化不易，且写且珍惜！</strong></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a href="http://blog.codinglabs.org/articles/theory-of-mysql-index.html" target="_blank" rel="external">MySQL索引背后的数据结构及算法原理</a></li>
+<li>&lt;高性能MySQL&gt;</li>
+</ol>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2017/08/10/zookeeper-distributed-lock/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Zookeeper伪集群部署与分布式读写锁实现</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+
+
+
+
+
+ 
+  <section id="comments">
+<!--高速版，加载速度快，使用前需测试页面的兼容性-->
+<div id="SOHUCS" sid="Mysql InnoDB索引原理与优化实践"></div>
+<script>
+  (function(){
+    var appid = 'cytaAX5GJ',
+    conf = '151130c35e2afb70db495d25ff695e45';
+    var doc = document,
+    s = doc.createElement('script'),
+    h = doc.getElementsByTagName('head')[0] || doc.head || doc.documentElement;
+    s.type = 'text/javascript';
+    s.charset = 'utf-8';
+    s.src =  'http://assets.changyan.sohu.com/upload/changyan.js?conf='+ conf +'&appid=' + appid;
+    h.insertBefore(s,h.firstChild);
+    window.SCS_NO_IFRAME = true;
+  })()
+</script>
+  </section>
+  
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2017 MccreeFei
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: false,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+  </div>
+</body>
+</html>

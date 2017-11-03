@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>SSM+Spring WebSocket+Stomp实时在线聊天室项目 | MccreeFei的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="项目展示与地址近段时间学习了SSM框架，就想利用这还算流行的SSM框架写个项目练练手，碰巧在网上看到了关于WebSocket的一些知识，于是就有了实现一个在线聊天室的想法。现在大体上的功能已经完成了。然后我买了一个云服务器，将整个项目部署了上去。项目地址：http://119.23.216.241/easy-chat(建议使用Chrome浏览，其他浏览器可能有兼容问题)。github地址：http">
+<meta name="keywords" content="SSM,项目">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SSM+Spring WebSocket+Stomp实时在线聊天室项目">
+<meta property="og:url" content="http://www.mccreefei.cn/2017/05/30/easychat/index.html">
+<meta property="og:site_name" content="MccreeFei的博客">
+<meta property="og:description" content="项目展示与地址近段时间学习了SSM框架，就想利用这还算流行的SSM框架写个项目练练手，碰巧在网上看到了关于WebSocket的一些知识，于是就有了实现一个在线聊天室的想法。现在大体上的功能已经完成了。然后我买了一个云服务器，将整个项目部署了上去。项目地址：http://119.23.216.241/easy-chat(建议使用Chrome浏览，其他浏览器可能有兼容问题)。github地址：http">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://otse9kdii.bkt.clouddn.com/17-7-30/27544851.jpg">
+<meta property="og:updated_time" content="2017-08-11T12:59:45.931Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SSM+Spring WebSocket+Stomp实时在线聊天室项目">
+<meta name="twitter:description" content="项目展示与地址近段时间学习了SSM框架，就想利用这还算流行的SSM框架写个项目练练手，碰巧在网上看到了关于WebSocket的一些知识，于是就有了实现一个在线聊天室的想法。现在大体上的功能已经完成了。然后我买了一个云服务器，将整个项目部署了上去。项目地址：http://119.23.216.241/easy-chat(建议使用Chrome浏览，其他浏览器可能有兼容问题)。github地址：http">
+<meta name="twitter:image" content="http://otse9kdii.bkt.clouddn.com/17-7-30/27544851.jpg">
+  
+    <link rel="alternative" href="/atom.xml" title="MccreeFei的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img src="/avatar.png" class="js-avatar" style="width: 100%;height: 100%;opacity: 1;">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">MccreeFei</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">Carpe Diem</p>
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+						<div class="icon-wrap icon-me hide" data-idx="3">
+							<div class="user"></div>
+							<div class="shoulder"></div>
+						</div>
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>菜单</li>
+						<li>标签</li>
+						
+						<li>友情链接</li>
+						
+						
+						<li>关于我</li>
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/categories/Java">JAVA相关</a></li>
+				        
+							<li><a href="/categories/Essay">随笔</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+								<a class="github" target="_blank" href="https://github.com/mccreefei" title="github">github</a>
+					        
+								<a class="mail" target="_blank" href="mailto:mccreefei@foxmail.com" title="mail">mail</a>
+					        
+								<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+					        
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						<a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/Jvm/" style="font-size: 13.33px;">Jvm</a> <a href="/tags/Mysql/" style="font-size: 13.33px;">Mysql</a> <a href="/tags/SSM/" style="font-size: 10px;">SSM</a> <a href="/tags/Wireshark/" style="font-size: 10px;">Wireshark</a> <a href="/tags/Zookeeper/" style="font-size: 10px;">Zookeeper</a> <a href="/tags/Distributed/" style="font-size: 10px;">分布式</a> <a href="/tags/MutiThread/" style="font-size: 20px;">多线程</a> <a href="/tags/DataStructure/" style="font-size: 16.67px;">数据结构</a> <a href="/tags/Algorithm/" style="font-size: 16.67px;">算法</a> <a href="/tags/Essay/" style="font-size: 10px;">随笔</a> <a href="/tags/Project/" style="font-size: 10px;">项目</a>
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="https://imququ.com/">JerryQu的博客</a>
+			        
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="http://zhangbuhuai.com/">张不坏的博客</a>
+			        
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="https://www.liaoxuefeng.com/">廖雪峰的官方网站</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+				
+				<section class="switch-part switch-part4">
+				
+					<div id="js-aboutme">浙江财经大学在读，对java web方向感兴趣，目前在浙江禾连网络有限公司担任java开发实习职务。   I just wake up and work hard     I leave the rest to god。</div>
+				</section>
+				
+			</div>
+		</div>
+	</header>				
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">MccreeFei</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+			
+				<img src="/avatar.png" class="js-avatar" style="width: 100%;height: 100%;opacity: 1;">
+			
+			</div>
+			<hgroup>
+			  <h1 class="header-author">MccreeFei</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">Carpe Diem</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/categories/Java">JAVA相关</a></li>
+		        
+					<li><a href="/categories/Essay">随笔</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/mccreefei" title="github">github</a>
+			        
+						<a class="mail" target="_blank" href="mailto:mccreefei@foxmail.com" title="mail">mail</a>
+			        
+						<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap"><article id="post-easychat" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2017/05/30/easychat/" class="article-date">
+  	<time datetime="2017-05-30T13:06:47.000Z" itemprop="datePublished">2017-05-30</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      SSM+Spring WebSocket+Stomp实时在线聊天室项目
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SSM/">SSM</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Project/">项目</a></li></ul>
+	</div>
+
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/Java/">Java</a>
+	</div>
+
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="项目展示与地址"><a href="#项目展示与地址" class="headerlink" title="项目展示与地址"></a>项目展示与地址</h2><p>近段时间学习了SSM框架，就想利用这还算流行的SSM框架写个项目练练手，碰巧在网上看到了关于<code>WebSocket</code>的一些知识，于是就有了实现一个在线聊天室的想法。现在大体上的功能已经完成了。然后我买了一个云服务器，将整个项目部署了上去。项目地址：<a href="http://119.23.216.241/easy-chat" target="_blank" rel="external">http://119.23.216.241/easy-chat</a>(<em>建议使用Chrome浏览，其他浏览器可能有兼容问题</em>)。github地址：<a href="https://github.com/MccreeFei/EasyChat" target="_blank" rel="external">https://github.com/MccreeFei/EasyChat</a>。整体的运行效果我还是挺满意的，后续有时间会追加一些其他功能。目前整个项目效果图如下面的gif图所示：<br><img src="http://otse9kdii.bkt.clouddn.com/17-7-30/27544851.jpg" alt=""></p>
+<p>因为对自己的定位是后端程序员，所以前端也就没怎么花心思，其中登录注册版块是在网上下载的<code>html</code>模板，然后自己写了一些<code>js</code>、<code>ajax</code>与后台交互，主页面模仿的一个用<code>Nodejs</code>实现聊天室的<a href="http://www.cnblogs.com/Wayou/p/hichat_built_with_nodejs_socket.html" target="_blank" rel="external">博客</a>。<br><a id="more"></a></p>
+<h2 id="WebSocket与Stomp"><a href="#WebSocket与Stomp" class="headerlink" title="WebSocket与Stomp"></a>WebSocket与Stomp</h2><p>要了解<code>WebSocket</code>就必须要知道为什么需要<code>WebSocket</code>。我们都知道<code>Http</code>协议，但是Http有一个缺陷就是：通信只能由客户端发起，也就是说，如果你想实现在线聊天功能，只能客户端不断地发送请求给服务器询问有没有新消息到达。可想而知，这种方式是非常占资源，且效率是非常低的。因此就有了<code>WebSocke</code>t的诞生。<code>WebSocket</code>是一种在单个<code>TCP</code> 连接上进行全双工通讯的协议，通信可以从任意一端发起。<code>WebSocket</code>在<code>Http</code>协议中完成握手，握手成功后升级到WebSocket协议。<code>WebSocket</code>可以传输文本以及二进制数据，但并未规范发送数据的格式。因此在<code>WebSocket</code>协议之上可以使用高层次的文本协议比如<code>Stomp</code>。<br><code>Stomp</code>(Streaming Text Orientated Message Protocol)是流文本定向消息协议，定义了消息发送的规范，它的<code>frame</code>中有<code>connect</code>、<code>subscribe</code>、<code>send</code>等命令，<code>connect</code>就是请求建立连接，其中头部有<code>accept-version</code>表示接受的<code>stomp</code>协议版本等，<code>subscribe</code>是订阅监听某一个地址的消息，常见头部有<code>destination</code>表示监听地址，<code>send</code>是发送消息到目标地址，常见头部有<code>destination</code>表示发送地址。关于<code>Stomp</code>的更多详细内容可以去看官方文档。<br><code>Spring</code>对基于<code>Stomp</code>的<code>WebSocket</code>提供了非常好的支持，只需要在项目中引入<code>spring-messaging</code>与<code>spring-websocket</code>模块。然后根据官方文档配置一下即可使用，配置代码如下所示：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * Spring websocket配置类</div><div class="line"> */</div><div class="line"><span class="meta">@Configuration</span></div><div class="line"><span class="meta">@EnableWebSocketMessageBroker</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WebSocketConfig</span> <span class="keyword">extends</span> <span class="title">AbstractWebSocketMessageBrokerConfigurer</span> </span>&#123;</div><div class="line">    <span class="comment">/**</span></div><div class="line">     * 定义接收/websocket时采用wensocket连接，添加HttpSessionHandshakeInterceptor 是为了websocket握手前将httpsession中的属性 </div><div class="line">     * 添加到websocket session中，withSockJS添加对sockJS的支持 </div><div class="line">     */</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">registerStompEndpoints</span><span class="params">(StompEndpointRegistry stompEndpointRegistry)</span> </span>&#123;</div><div class="line">        stompEndpointRegistry.addEndpoint(<span class="string">"/websocket"</span>).addInterceptors(<span class="keyword">new</span> HttpSessionHandshakeInterceptor()).withSockJS();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">/**</span></div><div class="line">     * 配置消息代理，以/app为头的url将会先经过MessageMapping </div><div class="line">     * /topic直接进入消息代理 </div><div class="line">     */</div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">configureMessageBroker</span><span class="params">(MessageBrokerRegistry registry)</span> </span>&#123;</div><div class="line">        registry.setApplicationDestinationPrefixes(<span class="string">"/app"</span>);</div><div class="line">        registry.enableSimpleBroker(<span class="string">"/topic"</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>另外补充一点的是：基于<code>WebSocket</code>添加了对<code>sockJS</code>的支持，<code>sockJS</code>会对那些客户端不支持<code>WebSocket</code>的浏览器更换策略比如长轮询，这样不支持<code>WebSocket</code>的浏览器也能享受服务器的服务，就是效率不高罢了。</p>
+<h2 id="登录注册模块"><a href="#登录注册模块" class="headerlink" title="登录注册模块"></a>登录注册模块</h2><p>登录与注册都采用了<code>ajax</code>技术，都是发送<code>json</code>数据到后台，后台查询然后返回<code>json</code>数据给前台做出响应。</p>
+<h3 id="登录"><a href="#登录" class="headerlink" title="登录"></a>登录</h3><p>返回登录<code>json</code>的消息，我封装了一个实体<code>ReplayLoginMessage</code>。项目添加了<code>jakson-databind</code>模块依赖并且mvc配置了<code>MappingJackson2HttpMessageConverter</code>，后端返回对象将会直接转化成<code>json</code>数据传递到前端。<code>MappingJackson2HttpMessageConverter</code>并不需要显示配置，添加<code>&lt;mvc: annoation driven/&gt;</code>注解支持将会添加基础的mvc注解支持和基础的<code>MessageConverter</code>。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * 反馈前端ajax登录的信息实体</div><div class="line"> */</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ReplyLoginMessage</span> </span>&#123;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Integer USER_NAME_NOT_EXIST = <span class="number">1</span>; <span class="comment">//当前登录的用户名尚未注册</span></div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Integer USER_PASSWORD_WRONG = <span class="number">2</span>; <span class="comment">//登录密码错误</span></div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Integer USER_NAME_OR_PASSWORD_NULL = <span class="number">3</span>; <span class="comment">//用户姓名或密码未填写</span></div><div class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> successed; <span class="comment">//登录是否成功</span></div><div class="line">    <span class="keyword">private</span> Integer errStatus; <span class="comment">//错误原因</span></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ReplyLoginMessage</span><span class="params">(<span class="keyword">boolean</span> successed)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.successed = successed;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ReplyLoginMessage</span><span class="params">(<span class="keyword">boolean</span> successed, Integer errStatus)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.successed = successed;</div><div class="line">        <span class="keyword">this</span>.errStatus = errStatus;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isSuccessed</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> successed;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setSuccessed</span><span class="params">(<span class="keyword">boolean</span> successed)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.successed = successed;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> Integer <span class="title">getErrStatus</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> errStatus;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setErrStatus</span><span class="params">(Integer errStatus)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.errStatus = errStatus;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>后端接收<code>json</code>数据只需要添加<code>@RequestBody</code>注解。只有后台返回登录的消息为<code>true</code>时，前端才会用js提交表单，提交表单后后台还需要再进行一次账号密码的验证。为什么要两次验证呢，我是想要用户登录错误时能够及时反馈用户出错的原因，是因为该用户还没有注册还是密码错误，这就需要<code>ajax</code>，那么为什么提交表单后还要再验证呢，是防止客户用第三方软件直接模仿表单提交。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line">    * 反馈前端ajax登录的消息 </div><div class="line">    */</div><div class="line">   <span class="meta">@RequestMapping</span>(value = <span class="string">"/reply/login"</span>, method = RequestMethod.POST)</div><div class="line">   <span class="meta">@ResponseBody</span></div><div class="line">   <span class="function"><span class="keyword">public</span> ReplyLoginMessage <span class="title">replayLoginMessage</span><span class="params">(@RequestBody User user)</span> </span>&#123;</div><div class="line">       <span class="keyword">if</span> (user.getName() == <span class="keyword">null</span> || user.getName().trim().equals(<span class="string">""</span>) || user.getPassword() == <span class="keyword">null</span> || user.getPassword().equals(<span class="string">""</span>)) &#123;</div><div class="line">           <span class="keyword">return</span> <span class="keyword">new</span> ReplyLoginMessage(<span class="keyword">false</span>, ReplyLoginMessage.USER_NAME_OR_PASSWORD_NULL);</div><div class="line">       &#125;</div><div class="line">       <span class="keyword">boolean</span> isExist = userService.isExistUser(user.getName());</div><div class="line">       <span class="keyword">if</span> (!isExist) &#123;</div><div class="line">           <span class="keyword">return</span> <span class="keyword">new</span> ReplyLoginMessage(<span class="keyword">false</span>, ReplyLoginMessage.USER_NAME_NOT_EXIST);</div><div class="line">       &#125;</div><div class="line">       User res = userService.validateUserPassword(user.getName(), user.getPassword());</div><div class="line">       <span class="keyword">if</span> (res == <span class="keyword">null</span>) &#123;</div><div class="line">           <span class="keyword">return</span> <span class="keyword">new</span> ReplyLoginMessage(<span class="keyword">false</span>, ReplyLoginMessage.USER_PASSWORD_WRONG);</div><div class="line">       &#125;</div><div class="line">       <span class="keyword">return</span> <span class="keyword">new</span> ReplyLoginMessage(<span class="keyword">true</span>);</div><div class="line">   &#125;</div></pre></td></tr></table></figure></p>
+<h3 id="注册"><a href="#注册" class="headerlink" title="注册"></a>注册</h3><p>同样用于返回前端注册消息，封装注册消息实体类。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * 反馈前端ajax注册的消息实体</div><div class="line"> */</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ReplyRegistMessage</span> </span>&#123;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Integer USER_NAME_EXIST = <span class="number">1</span>; <span class="comment">//注册名已经存在</span></div><div class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> successed;  <span class="comment">//是否注册成功</span></div><div class="line">    <span class="keyword">private</span> Integer errStatus;  <span class="comment">//错误原因</span></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ReplyRegistMessage</span><span class="params">(<span class="keyword">boolean</span> isSuccessed)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.successed = isSuccessed;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ReplyRegistMessage</span><span class="params">(<span class="keyword">boolean</span> isSuccessed, Integer errStatus)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.successed = isSuccessed;</div><div class="line">        <span class="keyword">this</span>.errStatus = errStatus;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isSuccessed</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> successed;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setSuccessed</span><span class="params">(<span class="keyword">boolean</span> successed)</span> </span>&#123;</div><div class="line">        successed = successed;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> Integer <span class="title">getErrStatus</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> errStatus;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setErrStatus</span><span class="params">(Integer errStatus)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.errStatus = errStatus;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>后台接收注册人的账号密码消息，插入到数据库完成注册。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line">     * 反馈前端ajax注册的消息</div><div class="line">     */</div><div class="line">    <span class="meta">@RequestMapping</span>(value = <span class="string">"/reply/regist"</span>, method = RequestMethod.POST)</div><div class="line">    <span class="meta">@ResponseBody</span></div><div class="line">    <span class="function"><span class="keyword">public</span> ReplyRegistMessage <span class="title">replyRegistMessage</span><span class="params">(@RequestBody User user)</span> </span>&#123;</div><div class="line">        <span class="keyword">boolean</span> isExist = userService.isExistUser(user.getName());</div><div class="line">        <span class="keyword">if</span> (isExist) &#123;</div><div class="line">            <span class="keyword">return</span> <span class="keyword">new</span> ReplyRegistMessage(<span class="keyword">false</span>, ReplyRegistMessage.USER_NAME_EXIST);</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (user.getPassword() != <span class="keyword">null</span>) &#123;</div><div class="line">            userService.insertUser(user.getName(), user.getPassword());</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">new</span> ReplyRegistMessage(<span class="keyword">true</span>);</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<h2 id="实时聊天模块"><a href="#实时聊天模块" class="headerlink" title="实时聊天模块"></a>实时聊天模块</h2><h3 id="订阅地址"><a href="#订阅地址" class="headerlink" title="订阅地址"></a>订阅地址</h3><p>要想监听哪个地址的消息就必须先订阅这个地址。我按照项目的需求划分了这几个地址：</p>
+<ol>
+<li><code>/app/chat/participants</code> ：以<code>/app</code>为前缀的地址首先会被<code>MessageMapping</code>或者<code>SubscribeMapping</code>处理，这个地址的目的就是客户登进聊天室时能够立即知晓目前聊天室的人数，它是交给后台<code>SubscribeMapping</code>注解方法处理的，后台将直接返回当前在线人数，然后前台得到数据后显示。</li>
+<li><code>/topic/login</code>：订阅新用户登录消息的地址，当有新用户登录时，后台将会向这个地址发送新用户的信息，前台显示新用户上线消息并将在线人数加1。、</li>
+<li><code>/topic/chat/message</code> ：订阅接收聊天消息的地址，每当有用户发送消息，后台就会向这个地址发送这个消息，前台显示出这个消息。</li>
+<li><code>/topic/logout</code>： 订阅用户离线消息的地址，每当有用户关闭浏览器，后台监听到然后向这个地址发送用户离线消息。</li>
+</ol>
+<p>前端相应代码：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line">    * 客户端连接服务端websocket  </div><div class="line">    * 并且订阅一系列频道，用来接收不同种类的消息 </div><div class="line">    * /app/chat/participants ：当前在线人数的消息，只会接收一次 </div><div class="line">    * /topic/login ： 新登录用户的消息 </div><div class="line">    * /topic/chat/message ： 聊天内容消息 </div><div class="line">    * /topic/logout : 用户离线的消息 </div><div class="line">    * 服务器发回json实例 &#123;"userName":"chris","sendDate":1494664021793,"content":"hello","messageType":"text"&#125; </div><div class="line">    * messageType分为：text与image</div><div class="line">    */</div><div class="line">   <span class="function"><span class="keyword">function</span> <span class="title">connect</span>(<span class="params"></span>) </span>&#123;</div><div class="line">       <span class="keyword">var</span> socket = <span class="keyword">new</span> SockJS($(<span class="string">"#websocketUrl"</span>).val().trim());</div><div class="line">       stompClient = Stomp.over(socket);</div><div class="line">       stompClient.connect(&#123;&#125;, <span class="function"><span class="keyword">function</span>(<span class="params">frame</span>) </span>&#123;</div><div class="line">           stompClient.subscribe(<span class="string">"/app/chat/participants"</span>, <span class="function"><span class="keyword">function</span>(<span class="params">message</span>) </span>&#123;</div><div class="line">               showActiveUserNumber(message.body);</div><div class="line">               <span class="keyword">var</span> user = <span class="string">"系统消息"</span>;</div><div class="line">               <span class="keyword">var</span> date = <span class="literal">null</span>;</div><div class="line">               <span class="keyword">var</span> msg = $(<span class="string">"#myName"</span>).val() + <span class="string">"加入聊天！"</span>;</div><div class="line">               showNewMessage(user, date, msg);</div><div class="line">           &#125;);</div><div class="line">           stompClient.subscribe(<span class="string">"/topic/login"</span>, <span class="function"><span class="keyword">function</span>(<span class="params">message</span>) </span>&#123;</div><div class="line">               showNewUser(message.body);</div><div class="line">           &#125;);</div><div class="line">           stompClient.subscribe(<span class="string">"/topic/chat/message"</span>, <span class="function"><span class="keyword">function</span>(<span class="params">message</span>) </span>&#123;</div><div class="line">               <span class="keyword">var</span> json = <span class="built_in">JSON</span>.parse(message.body);</div><div class="line">               <span class="keyword">var</span> messageType = json.messageType;</div><div class="line">               <span class="keyword">var</span> user = json.userName;</div><div class="line">               <span class="keyword">var</span> date = json.sendDate;</div><div class="line">               <span class="keyword">var</span> msg = json.content;</div><div class="line">               <span class="keyword">if</span> (messageType == <span class="string">"text"</span>) &#123;</div><div class="line">                   showNewMessage(user, date, msg);</div><div class="line">               &#125; <span class="keyword">else</span> <span class="keyword">if</span> (messageType == <span class="string">"image"</span>) &#123;</div><div class="line">                   showNewImage(user, date, msg);</div><div class="line">               &#125;</div><div class="line">           &#125;)stompClient.subscribe(<span class="string">"/topic/logout"</span>, <span class="function"><span class="keyword">function</span>(<span class="params">message</span>) </span>&#123;</div><div class="line">               showUserLogout(message.body);</div><div class="line">           &#125;)&#125;);</div><div class="line">   &#125;</div></pre></td></tr></table></figure></p>
+<p>后台处理相关代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line">     * 登录进入聊天室</div><div class="line">     */</div><div class="line">    <span class="meta">@RequestMapping</span>(value = <span class="string">"/chat"</span>, method = RequestMethod.POST)</div><div class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">loginIntoChatRoom</span><span class="params">(User user, HttpServletRequest request)</span> </span>&#123;</div><div class="line">        user = userService.validateUserPassword(user.getName(), user.getPassword());</div><div class="line">        <span class="keyword">if</span> (user == <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">return</span> <span class="string">"login"</span>;</div><div class="line">        &#125;</div><div class="line">        user.setLoginDate(<span class="keyword">new</span> Date());</div><div class="line">        user.setPassword(<span class="keyword">null</span>); <span class="comment">//设空防止泄露给其他用户 </span></div><div class="line">        HttpSession session = request.getSession();</div><div class="line">        session.setAttribute(<span class="string">"user"</span>, user);</div><div class="line">        messagingTemplate.convertAndSend(SUBSCRIBE_LOGIN_URI, user);</div><div class="line">        participantRepository.add(user.getName(), user);</div><div class="line">        logger.info(user.getLoginDate() + <span class="string">", "</span> + user.getName() + <span class="string">" login."</span>);</div><div class="line">        <span class="keyword">return</span> <span class="string">"chatroom"</span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">/**</span></div><div class="line">     * 返回当前在线人数 * <span class="doctag">@return</span></div><div class="line">     */</div><div class="line">    <span class="meta">@SubscribeMapping</span>(<span class="string">"/chat/participants"</span>)</div><div class="line">    <span class="function"><span class="keyword">public</span> Long <span class="title">getActiveUserNumber</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> Long.valueOf(participantRepository.getActiveSessions().values().size());</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<h3 id="发送文本消息"><a href="#发送文本消息" class="headerlink" title="发送文本消息"></a>发送文本消息</h3><p>前端监听监听键盘事件，如果是Enter键那么向发送消息地址发送输入框中的消息。发送<code>Emoji</code>图片也是相当于发送文本的，用户选择哪个<code>Emoji</code>图片只是将<code>[EMOJI:&#39;id&#39;]</code>形式的文本插入输入框当做文本信息发送。服务端并不解析，只是将相同的文本发送到相应的地址，由前端接收到时用正则表达式匹配整个文本的内容然后替换成p标签。相关代码如下所示：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line">     * 发送输入框中的信息</div><div class="line">     */</div><div class="line">    <span class="function"><span class="keyword">function</span> <span class="title">sendMessage</span>(<span class="params"></span>) </span>&#123;</div><div class="line">        <span class="keyword">var</span> content = $(<span class="string">"#messageInput"</span>).val();</div><div class="line">        <span class="keyword">if</span> (content.trim().length != <span class="number">0</span>) &#123;</div><div class="line">            $(<span class="string">"#messageInput"</span>).val(<span class="string">''</span>);</div><div class="line">            stompClient.send(<span class="string">"/app/chat/message"</span>, &#123;&#125;, <span class="built_in">JSON</span>.stringify(&#123;<span class="string">'userName'</span> :$(<span class="string">"#myName"</span>).val(), <span class="string">'content'</span> :content &#125;))</div><div class="line">            ;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">/**</span></div><div class="line">     * 正则表达式显示消息中的emoji图片 </div><div class="line">     * 返回添加emoji图片标签后的消息</div><div class="line">     */</div><div class="line">    <span class="function"><span class="keyword">function</span> <span class="title">showEmoji</span>(<span class="params">message</span>) </span>&#123;</div><div class="line">        <span class="keyword">var</span> result = message, regrex = <span class="regexp">/\[EMOJI:\d +\]/g</span>, match;</div><div class="line">        <span class="keyword">while</span> (match = regrex.exec(message)) &#123;</div><div class="line">            <span class="keyword">var</span> emojiIndex = match[<span class="number">0</span>].slice(<span class="number">7</span>, <span class="number">-1</span>);</div><div class="line">            <span class="keyword">var</span> emojiUrl = $(<span class="string">"#emojiBaseUri"</span>).val().trim() + emojiIndex + <span class="string">".gif"</span>;</div><div class="line">            result = result.replace(match[<span class="number">0</span>], <span class="string">''</span>);</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> result;</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>后台只是转发文本信息：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line">     * 接收并且转发消息 </div><div class="line">     */</div><div class="line">    <span class="meta">@MessageMapping</span>(<span class="string">"/chat/message"</span>)</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">receiveMessage</span><span class="params">(Message message)</span> </span>&#123;</div><div class="line">        message.setSendDate(<span class="keyword">new</span> Date());</div><div class="line">        message.setMessageType(<span class="string">"text"</span>);</div><div class="line">        logger.info(message.getSendDate() + <span class="string">","</span> + message.getUserName() + <span class="string">" send a message:"</span> + message.getContent());</div><div class="line">        messagingTemplate.convertAndSend(SUBSCRIBE_MESSAGE_URI, message);</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<h3 id="发送图片"><a href="#发送图片" class="headerlink" title="发送图片"></a>发送图片</h3><p>发送图片我是采用的<code>ajax</code>提交表单的形式提交图片，<code>form</code>标签中需要添加<code>enctype=&quot;multipart/form-data&quot;</code>属性，让浏览器知道怎么编码文件。另前端<code>ajax</code>中用<code>FormData</code>提交表单内容,通过<code>FormData</code>对象可以组装一组用 <code>XMLHttpRequest</code>发送请求的键/值对，达到提交表单功能。后端用<code>MutipartFile</code>来接受文件，然后组合图片名称转存到服务器的相应目录下，服务器再将图片地址发送给各个用户来显示图片。相应代码如下所示：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line">     * 上传图片发送</div><div class="line">     */</div><div class="line">    $(<span class="string">"#sendImage"</span>).bind(<span class="string">"change"</span>,<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.files.length != <span class="number">0</span>) &#123;</div><div class="line">            $.ajax(&#123;<span class="attr">url</span>:$(<span class="string">"#uploadUrl"</span>).val(), <span class="attr">type</span>:<span class="string">'POST'</span>, <span class="attr">cache</span>:<span class="literal">false</span>, <span class="attr">data</span>:</div><div class="line">            <span class="keyword">new</span> FormData($(<span class="string">'#sendImageForm'</span>)[<span class="number">0</span>]), <span class="attr">processData</span>:<span class="literal">false</span>, <span class="attr">contentType</span>:<span class="literal">false</span> &#125;).done(<span class="function"><span class="keyword">function</span>(<span class="params">res</span>) </span>&#123;</div><div class="line">                <span class="built_in">console</span>.log(res);</div><div class="line">            &#125;).fail(<span class="function"><span class="keyword">function</span>(<span class="params">res</span>) </span>&#123;</div><div class="line">                <span class="built_in">console</span>.log(res);</div><div class="line">            &#125;);</div><div class="line">        &#125;</div><div class="line">    &#125;);</div></pre></td></tr></table></figure></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line">    * 接收转发图片 </div><div class="line">    */</div><div class="line">   <span class="meta">@RequestMapping</span>(value = <span class="string">"/upload/image"</span>, method = RequestMethod.POST)</div><div class="line">   <span class="meta">@ResponseBody</span></div><div class="line">   <span class="function"><span class="keyword">public</span> String <span class="title">handleUploadImage</span><span class="params">(HttpServletRequest request, @RequestParam(<span class="string">"image"</span>)</span> MultipartFile imageFile, @<span class="title">RequestParam</span><span class="params">(<span class="string">"userName"</span>)</span> String userName) </span>&#123;</div><div class="line">       <span class="keyword">if</span> (!imageFile.isEmpty()) &#123;</div><div class="line">           String imageName = userName + <span class="string">"_"</span> + imageFile.getOriginalFilename();</div><div class="line">           String path = request.getServletContext().getRealPath(IMAGE_PREFIX) + imageName;</div><div class="line">           File localImageFile = <span class="keyword">new</span> File(path);</div><div class="line">           <span class="keyword">try</span> &#123;</div><div class="line">               imageFile.transferTo(localImageFile); <span class="comment">//文件转存到服务器文件中</span></div><div class="line">               Message message = <span class="keyword">new</span> Message();</div><div class="line">               message.setMessageType(<span class="string">"image"</span>);</div><div class="line">               message.setUserName(userName);</div><div class="line">               message.setSendDate(<span class="keyword">new</span> Date());</div><div class="line">               message.setContent(request.getContextPath() + IMAGE_PREFIX + imageName);</div><div class="line">               messagingTemplate.convertAndSend(SUBSCRIBE_MESSAGE_URI, message);</div><div class="line">           &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line">               logger.error(<span class="string">"图片上传失败："</span> + e.getMessage());</div><div class="line">               <span class="keyword">return</span> <span class="string">"upload false"</span>;</div><div class="line">           &#125;</div><div class="line">       &#125;</div><div class="line">       <span class="keyword">return</span> <span class="string">"upload success"</span>;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><ol>
+<li><a href="http://www.cnblogs.com/Wayou/p/hichat_built_with_nodejs_socket.html" target="_blank" rel="external">Node.js + WebSocket打造及时聊天程序嗨聊</a></li>
+<li><a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/html/websocket.html" target="_blank" rel="external">Spring WebSocket Support</a></li>
+<li><a href="http://jmesnil.net/stomp-websocket/doc/" target="_blank" rel="external">STOMP Over WebSocket</a></li>
+<li><a href="https://stomp.github.io/stomp-specification-1.1.html" target="_blank" rel="external">STOMP Protocol Specification, Version 1.1</a></li>
+<li><a href="http://www.ruanyifeng.com/blog/2017/05/websocket.html" target="_blank" rel="external">WebSocket教程</a></li>
+<li><a href="https://github.com/sockjs/sockjs-client" target="_blank" rel="external">SockJS-client API</a></li>
+</ol>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/06/15/https/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          HTTPS理解与Wireshark抓包实践
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/05/18/mysql-innodb-lock/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Mysql InnoDB锁机制</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+
+
+
+
+
+ 
+  <section id="comments">
+<!--高速版，加载速度快，使用前需测试页面的兼容性-->
+<div id="SOHUCS" sid="SSM+Spring WebSocket+Stomp实时在线聊天室项目"></div>
+<script>
+  (function(){
+    var appid = 'cytaAX5GJ',
+    conf = '151130c35e2afb70db495d25ff695e45';
+    var doc = document,
+    s = doc.createElement('script'),
+    h = doc.getElementsByTagName('head')[0] || doc.head || doc.documentElement;
+    s.type = 'text/javascript';
+    s.charset = 'utf-8';
+    s.src =  'http://assets.changyan.sohu.com/upload/changyan.js?conf='+ conf +'&appid=' + appid;
+    h.insertBefore(s,h.firstChild);
+    window.SCS_NO_IFRAME = true;
+  })()
+</script>
+  </section>
+  
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2017 MccreeFei
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: false,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+  </div>
+</body>
+</html>

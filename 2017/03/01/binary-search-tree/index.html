@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>《算法导论》读书笔记之二叉搜索树 | MccreeFei的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="什么是二叉搜索树？二叉搜索树首先是一颗二叉树，其次是它的关键字总是满足以下性质：  设x是二叉搜索树的一个结点。如果y是x左子树中的一个结点，那么y.key &amp;lt;= x.key。如果y是x右子树中的一个结点，那么y.key &amp;gt;= x.key。 为了简洁这里就将key设为int，并且不采用泛型，下面是结点的结构：123456class Node &amp;#123;        public N">
+<meta name="keywords" content="数据结构,算法">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《算法导论》读书笔记之二叉搜索树">
+<meta property="og:url" content="http://www.mccreefei.cn/2017/03/01/binary-search-tree/index.html">
+<meta property="og:site_name" content="MccreeFei的博客">
+<meta property="og:description" content="什么是二叉搜索树？二叉搜索树首先是一颗二叉树，其次是它的关键字总是满足以下性质：  设x是二叉搜索树的一个结点。如果y是x左子树中的一个结点，那么y.key &amp;lt;= x.key。如果y是x右子树中的一个结点，那么y.key &amp;gt;= x.key。 为了简洁这里就将key设为int，并且不采用泛型，下面是结点的结构：123456class Node &amp;#123;        public N">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://otse9kdii.bkt.clouddn.com/17-7-29/58882157.jpg">
+<meta property="og:updated_time" content="2017-08-11T12:53:07.786Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="《算法导论》读书笔记之二叉搜索树">
+<meta name="twitter:description" content="什么是二叉搜索树？二叉搜索树首先是一颗二叉树，其次是它的关键字总是满足以下性质：  设x是二叉搜索树的一个结点。如果y是x左子树中的一个结点，那么y.key &amp;lt;= x.key。如果y是x右子树中的一个结点，那么y.key &amp;gt;= x.key。 为了简洁这里就将key设为int，并且不采用泛型，下面是结点的结构：123456class Node &amp;#123;        public N">
+<meta name="twitter:image" content="http://otse9kdii.bkt.clouddn.com/17-7-29/58882157.jpg">
+  
+    <link rel="alternative" href="/atom.xml" title="MccreeFei的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img src="/avatar.png" class="js-avatar" style="width: 100%;height: 100%;opacity: 1;">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">MccreeFei</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">Carpe Diem</p>
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+						<div class="icon-wrap icon-me hide" data-idx="3">
+							<div class="user"></div>
+							<div class="shoulder"></div>
+						</div>
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>菜单</li>
+						<li>标签</li>
+						
+						<li>友情链接</li>
+						
+						
+						<li>关于我</li>
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/categories/Java">JAVA相关</a></li>
+				        
+							<li><a href="/categories/Essay">随笔</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+								<a class="github" target="_blank" href="https://github.com/mccreefei" title="github">github</a>
+					        
+								<a class="mail" target="_blank" href="mailto:mccreefei@foxmail.com" title="mail">mail</a>
+					        
+								<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+					        
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						<a href="/tags/HTTPS/" style="font-size: 10px;">HTTPS</a> <a href="/tags/Jvm/" style="font-size: 13.33px;">Jvm</a> <a href="/tags/Mysql/" style="font-size: 13.33px;">Mysql</a> <a href="/tags/SSM/" style="font-size: 10px;">SSM</a> <a href="/tags/Wireshark/" style="font-size: 10px;">Wireshark</a> <a href="/tags/Zookeeper/" style="font-size: 10px;">Zookeeper</a> <a href="/tags/Distributed/" style="font-size: 10px;">分布式</a> <a href="/tags/MutiThread/" style="font-size: 20px;">多线程</a> <a href="/tags/DataStructure/" style="font-size: 16.67px;">数据结构</a> <a href="/tags/Algorithm/" style="font-size: 16.67px;">算法</a> <a href="/tags/Essay/" style="font-size: 10px;">随笔</a> <a href="/tags/Project/" style="font-size: 10px;">项目</a>
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="https://imququ.com/">JerryQu的博客</a>
+			        
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="http://zhangbuhuai.com/">张不坏的博客</a>
+			        
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="https://www.liaoxuefeng.com/">廖雪峰的官方网站</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+				
+				<section class="switch-part switch-part4">
+				
+					<div id="js-aboutme">浙江财经大学在读，对java web方向感兴趣，目前在浙江禾连网络有限公司担任java开发实习职务。   I just wake up and work hard     I leave the rest to god。</div>
+				</section>
+				
+			</div>
+		</div>
+	</header>				
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">MccreeFei</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+			
+				<img src="/avatar.png" class="js-avatar" style="width: 100%;height: 100%;opacity: 1;">
+			
+			</div>
+			<hgroup>
+			  <h1 class="header-author">MccreeFei</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">Carpe Diem</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/categories/Java">JAVA相关</a></li>
+		        
+					<li><a href="/categories/Essay">随笔</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/mccreefei" title="github">github</a>
+			        
+						<a class="mail" target="_blank" href="mailto:mccreefei@foxmail.com" title="mail">mail</a>
+			        
+						<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap"><article id="post-binary-search-tree" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2017/03/01/binary-search-tree/" class="article-date">
+  	<time datetime="2017-03-01T12:56:18.000Z" itemprop="datePublished">2017-03-01</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      《算法导论》读书笔记之二叉搜索树
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/DataStructure/">数据结构</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Algorithm/">算法</a></li></ul>
+	</div>
+
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/Java/">Java</a>
+	</div>
+
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="什么是二叉搜索树？"><a href="#什么是二叉搜索树？" class="headerlink" title="什么是二叉搜索树？"></a>什么是二叉搜索树？</h2><p>二叉搜索树首先是一颗二叉树，其次是它的关键字总是满足以下性质：</p>
+<p><strong> 设x是二叉搜索树的一个结点。如果y是x左子树中的一个结点，那么y.key &lt;= x.key。如果y是x右子树中的一个结点，那么y.key &gt;= x.key。</strong></p>
+<p>为了简洁这里就将key设为<code>int</code>，并且不采用泛型，下面是结点的结构：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Node</span> </span>&#123;</div><div class="line">        <span class="keyword">public</span> Node left;</div><div class="line">        <span class="keyword">public</span> Node right;</div><div class="line">        <span class="keyword">public</span> Node parent;</div><div class="line">        <span class="keyword">public</span> <span class="keyword">int</span> key;</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<h2 id="二叉树的插入"><a href="#二叉树的插入" class="headerlink" title="二叉树的插入"></a>二叉树的插入</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">insert</span><span class="params">(Node root, <span class="keyword">int</span> val)</span> </span>&#123;</div><div class="line">        Node newNode = <span class="keyword">new</span> Node(); <span class="comment">//将关键字包装成新结点</span></div><div class="line">        newNode.left = <span class="keyword">null</span>;</div><div class="line">        newNode.right = <span class="keyword">null</span>;</div><div class="line">        newNode.key = val;</div><div class="line">        Node p = <span class="keyword">null</span>; <span class="comment">//p始终指向c的父结点</span></div><div class="line">        Node c = root; <span class="comment">//c用来查找新结点所在的位置</span></div><div class="line">        <span class="keyword">while</span> (c != <span class="keyword">null</span>) &#123;</div><div class="line">            p = c;</div><div class="line">            <span class="keyword">if</span> (val &lt; c.key) c = c.left;</div><div class="line">            <span class="keyword">else</span> c = c.right;</div><div class="line">        &#125;</div><div class="line">        newNode.parent = p;</div><div class="line">        <span class="keyword">if</span> (p == <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">this</span>.root = newNode; <span class="comment">//p为空意味着二叉树为空，新结点为根节点</span></div><div class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (val &lt; p.key)</div><div class="line">            p.left = newNode;</div><div class="line">        <span class="keyword">else</span> </div><div class="line">            p.right = newNode;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<a id="more"></a>
+<p>从根结点开始，引用c记录一条从上往下的简单路径，循环过程中保证p作为c的父结点。while循环使得这两个引用向下移动，向左向右移动取决于val和c.key的比较，直到x变为空。现在x所在的位置就是新结点放置的位置，而此时的p就是新结点的父结点。整个insert过程在一颗高度为h的树上运行时间为O(h)。</p>
+<h2 id="二叉搜索树的删除"><a href="#二叉搜索树的删除" class="headerlink" title="二叉搜索树的删除"></a>二叉搜索树的删除</h2><p>删除一个结点z主要分为下面几种基本情况：</p>
+<p><img src="http://otse9kdii.bkt.clouddn.com/17-7-29/58882157.jpg" alt=""></p>
+<ul>
+<li><p>其中a、b属于同种情况：如果z结点的左子树为空，只需要将z删除，把r变为z父结点的子结点即可，右子树为空同理。</p>
+</li>
+<li><p>c情况：查找z右子树中的最小结点，如果这个最小结点y恰好是z的右子结点，那么删除z结点，将z结点的左子结点连接到y的左子结点并且让y成为z父结点的子结点。</p>
+</li>
+<li><p>d情况：z右子树中的最小结点y不是z的右子结点，这样就需要将它转换为c情况，转换分为两步，第一步将y的右子结点连接到y父结点的左子结点上，第二步将z的右子结点连接到y的右子结点上，这样就转化成了情况c。</p>
+</li>
+</ul>
+<p>二叉搜索树删除操作中需要用到查找最小结点的函数，根据二叉搜索树的性质，只要不断遍历根结点的左子树，直到所在结点的左子树为空，那么就找到了最小结点。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> Node <span class="title">searchMin</span><span class="params">(Node root)</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (root == <span class="keyword">null</span>) <span class="keyword">return</span> root;</div><div class="line">        <span class="keyword">while</span> (root.left != <span class="keyword">null</span>) &#123;</div><div class="line">            root = root.left;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> root;</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>另外为了在二叉树内移动子树，定义一个过程<code>transplant</code>，它是用一棵以q为根的子树来替换一棵以p为根的子树，结点p的父结点变为q的父结点，q成为p父结点的孩子。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">transplant</span><span class="params">(Node p, Node q)</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (p == <span class="keyword">null</span>) <span class="keyword">return</span>;</div><div class="line">        Node parent = p.parent;</div><div class="line">        <span class="keyword">if</span> (parent == <span class="keyword">null</span>) <span class="keyword">this</span>.root = q;</div><div class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (parent.left == p) parent.left = q;</div><div class="line">        <span class="keyword">else</span> parent.right = q;</div><div class="line">        <span class="keyword">if</span> (q != <span class="keyword">null</span>) q.parent = parent;</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>下面就是整个删除过程：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> Node <span class="title">delete</span><span class="params">(<span class="keyword">int</span> val)</span> </span>&#123;</div><div class="line">        Node cur = search(val);</div><div class="line">        <span class="keyword">if</span> (cur == <span class="keyword">null</span>) <span class="keyword">return</span> cur;</div><div class="line">        <span class="keyword">if</span> (cur.left == <span class="keyword">null</span>) transplant(cur, cur.right);<span class="comment">//情况a</span></div><div class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (cur.right == <span class="keyword">null</span>) transplant(cur, cur.left);<span class="comment">//情况b</span></div><div class="line">        <span class="keyword">else</span> &#123;</div><div class="line">            Node rightMin = searchMin(cur.right);</div><div class="line">            <span class="keyword">if</span> (rightMin.parent != cur) &#123; <span class="comment">//情况d</span></div><div class="line">                transplant(rightMin, rightMin.right);</div><div class="line">                rightMin.right = cur.right;</div><div class="line">                cur.right.parent = rightMin;</div><div class="line">            &#125;</div><div class="line">            transplant(cur, rightMin); <span class="comment">//情况c</span></div><div class="line">            rightMin.left = cur.left;</div><div class="line">            cur.left.parent = rightMin;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> cur;</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>删除操作除了<code>searchMin</code>，其他每一行只花费常数时间，所以整个删除运行时间为<code>O(h)</code>。</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/03/07/red-black-tree/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          《算法导论》读书笔记之红黑树
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/02/13/jvm-commmand-ex/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">简单jvm编译指令理解</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+
+
+
+
+
+ 
+  <section id="comments">
+<!--高速版，加载速度快，使用前需测试页面的兼容性-->
+<div id="SOHUCS" sid="《算法导论》读书笔记之二叉搜索树"></div>
+<script>
+  (function(){
+    var appid = 'cytaAX5GJ',
+    conf = '151130c35e2afb70db495d25ff695e45';
+    var doc = document,
+    s = doc.createElement('script'),
+    h = doc.getElementsByTagName('head')[0] || doc.head || doc.documentElement;
+    s.type = 'text/javascript';
+    s.charset = 'utf-8';
+    s.src =  'http://assets.changyan.sohu.com/upload/changyan.js?conf='+ conf +'&appid=' + appid;
+    h.insertBefore(s,h.firstChild);
+    window.SCS_NO_IFRAME = true;
+  })()
+</script>
+  </section>
+  
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2017 MccreeFei
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: false,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+  </div>
+</body>
+</html>
